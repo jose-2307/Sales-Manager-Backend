@@ -52,6 +52,24 @@ class User extends Model {
     });
     this.belongsTo(models.Role, {
       as: "role"
+    });
+    this.hasMany(models.Product, {
+      as: "products",
+      foreignKey: "userId"
+    });
+    this.belongsToMany(models.UserProductPurchase, {
+      as: "items",
+      foreignKey: "userId",
+      otherKey: "productId"
+    });
+    this.hasMany(models.Customer, {
+      as: "customers",
+      foreignKey: "userId"
+    });
+    this.belongsToMany(models.Defaulter, {
+      as: "defaulters",
+      foreignKey: "userId",
+      otherKey: "customerId",
     })
   }
   static config(sequelize) {
