@@ -25,11 +25,6 @@ const UserSchema = {
     unique: true,
     allowNull: false,
   },
-  paymentDeadline: {
-    type: DataTypes.INTEGER,
-    unique: false,
-    allowNull: false,
-  },
   roleId: {
     field: "role_id",
     allowNull: false,

@@ -1,4 +1,4 @@
-const { Models, DataTypes } = require("sequelize");
+const { Model, DataTypes } = require("sequelize");
 const { USER_TABLE } = require("./user.model");
 const { PRODUCT_TABLE } = require("./product.model");
 
@@ -52,7 +52,7 @@ const UserProductPurchaseSchema = {
   },
 }
 
-class UserProductPurchase extends Models {
+class UserProductPurchase extends Model {
 
   static config(sequelize) {
     return {

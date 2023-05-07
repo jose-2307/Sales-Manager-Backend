@@ -6,7 +6,15 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrations:generate": "sequelize-cli migration:generate --name",
+    "migrations:run": "sequelize-cli db:migrate",
+    "migrations:revert": "sequelize-cli db:migrate:undo",
+    "migrations:delete": "sequelize-cli db:migrate:undo:all",
+    "seeders:generate": "sequelize-cli seed:generate --name",
+    "seeders:run": "sequelize-cli db:seed:all",
+    "seeders:revert": "sequelize-cli db:seed:undo",
+    "seeders:delete": "sequelize-cli db:seed:undo:all"
   },
   "keywords": [],
   "author": "José Luis Flores <joseluisflores2307@gmail.com>",
