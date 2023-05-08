@@ -48,6 +48,7 @@ module.exports = {
         type: DataTypes.STRING,
         unique: false,
         allowNull: false,
+        field: "last_name",
       },
       email: {
         type: DataTypes.STRING,

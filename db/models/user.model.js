@@ -19,6 +19,7 @@ const UserSchema = {
     type: DataTypes.STRING,
     unique: false,
     allowNull: false,
+    field: "last_name",
   },
   email: {
     type: DataTypes.STRING,
@@ -52,8 +53,9 @@ class User extends Model {
       as: "products",
       foreignKey: "userId"
     });
-    this.belongsToMany(models.UserProductPurchase, {
+    this.belongsToMany(models.Product, {
       as: "items",
+      through: models.UserProductPurchase,
       foreignKey: "userId",
       otherKey: "productId"
     });
@@ -61,8 +63,9 @@ class User extends Model {
       as: "customers",
       foreignKey: "userId"
     });
-    this.belongsToMany(models.Defaulter, {
+    this.belongsToMany(models.Customer, {
       as: "defaulters",
+      through: models.Defaulter,
       foreignKey: "userId",
       otherKey: "customerId",
     })

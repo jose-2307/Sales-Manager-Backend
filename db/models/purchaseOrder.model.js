@@ -53,8 +53,9 @@ class PurchaseOrder extends Model {
     this.belongsTo(models.Customer, {
       as: "customer"
     });
-    this.belongsToMany(models.PurchaseOrderProduct, {
+    this.belongsToMany(models.Product, {
       as: "orderProducts",
+      through: models.PurchaseOrderProduct,
       foreignKey: "purchaseOrderId",
       otherKey: "productId"
     });

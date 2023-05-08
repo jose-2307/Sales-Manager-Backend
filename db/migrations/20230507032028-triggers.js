@@ -18,14 +18,14 @@ module.exports = {
 
     await queryInterface.sequelize.query(
       'CREATE TRIGGER trigger_defaulter_create '+
-      'BEFORE INSERT ON purchase_orders '+
+      'BEFORE INSERT ON customers '+
       'FOR EACH ROW EXECUTE FUNCTION defaulter_create();'
     );
   },
 
 
   async down (queryInterface) {
-    await queryInterface.sequelize.query("DROP TRIGGER trigger_defaulter_create ON defaulters");
+    await queryInterface.sequelize.query("DROP TRIGGER trigger_defaulter_create ON customers");
     await queryInterface.sequelize.query("DROP FUNCTION defaulter_create;");
   }
 };
