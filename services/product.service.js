@@ -7,6 +7,18 @@ class ProductService {
   async create(data) {
     await this.findName(data.userId, data.name); //busca duplicidad en el nombre
     const newProduct = await models.Product.create(data);
+    const { id } = newProduct;
+    const { urls } = data;
+    if (urls) {
+      const images = urls.map(url => {
+        return {
+          url,
+          productId: id,
+        }
+      });
+      console.log(images);
+      // const newImages = await this.createImages();
+    }
     return newProduct;
   }
 
@@ -45,18 +57,67 @@ class ProductService {
 
   async update(id, changes) {
     const product = await this.findOne(id);
+    //! Añadir lo de las imagenes
+
     const resp = await product.update(id,changes);
     return resp;
   }
 
   //Se utiliza cuando se hacen ventas o compras de un producto
-  async updateWeight(id, weight, isPurchase) {
+  async updateWeight(id, newWeight, isPurchase) {
+    const product = await this.findOne(id);
+    let { weight } = product;
     if (isPurchase) {
       //se suma
+      weight += newWeight;
     } else {
       //se resta
+      weight -= newWeight;
     }
+    const resp = await this.update(id, { weight });
+    return resp;
   }
+
+  //---------------UserProductsPurchase
+
+  async createPurchaseByUser(data) {
+    const newPurchase = await models.UserProductPurchase.create(data);
+    const resp = await this.updateWeight(newPurchase.productId,newPurchase.weight,true);
+    return {newPurchase, resp};
+  }
+
+  async findAllByProduct(productId) {
+    const purchases = await models.UserProductPurchase.findAll({
+      where: {
+        productId
+      }
+    });
+    return purchases;
+  }
+
+  async findOnePurchase(id) {
+    const purchase = await models.UserProductPurchase.findByPk(id);
+    if(!purchase) {
+      throw boom.notFound("Purchase not found");
+    }
+    return purchase;
+  }
+
+  //---------------Images
+
+  async createImages(data) {
+    const newImages = await models.Image.bulkCreate(data);
+    return newImages
+  }
+
+  // async deleteImages(ids) {
+  //   let exist = false;
+  //   for (let i; i < ids.length; i++) {
+
+  //   }
+  // }
+
+  //---------------------
 
   async delete(id) {
     const product = await this.findOne(id);
