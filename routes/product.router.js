@@ -1,11 +1,61 @@
 const express = require("express");
 const ProductService = require("../services/product.service");
 const validatorHanlder = require("../middlewares/validator.handler");
-const { createProductSchema, getProductSchema, updateProductSchema, getProductsByCategorySchema } = require("../schemas/product.schema");
+const {
+  createProductSchema,
+  getProductSchema,
+  updateProductSchema,
+  getProductsByCategorySchema,
+  createPurchaseSchema,
+  getAllPurchaseProductSchema,
+  getPurchaseSchema
+} = require("../schemas/product.schema");
 
 const router = express.Router();
 const service = new ProductService();
 
+//------------Purchase
+
+router.post("/purchase",
+  validatorHanlder(createPurchaseSchema, "body"),
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      const newPurchase = await service.createPurchaseByUser(body);
+      res.status(201).json(newPurchase);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/purchase-all/:productId",
+  validatorHanlder(getAllPurchaseProductSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const { productId } = req.params;
+      const purchases = await service.findAllByProduct(productId);
+      res.json(purchases);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/purchase/:id",
+  validatorHanlder(getPurchaseSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const purchase = await service.findOnePurchase(id);
+      res.json(purchase);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//----------------
 
 router.get("/:userId/:categoryId",
   validatorHanlder(getProductsByCategorySchema,"params"),
@@ -37,7 +87,7 @@ router.post("/",
   validatorHanlder(createProductSchema, "body"),
   async (req, res, next) => {
     try {
-      const { body } = req.body;
+      const body = req.body;
       const newProduct = await service.create(body);
       res.status(201).json(newProduct);
     } catch (error) {
@@ -52,7 +102,7 @@ router.patch("/:id", //! Añadir lo de las imagenes
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { body } = req.body;
+      const body = req.body;
       const resp = await service.update(id, body);
       res.json(resp);
     } catch (error) {
@@ -69,13 +119,10 @@ router.delete("/:id",
       const resp = await service.delete(id);
       res.json({resp});
     } catch (error) {
-      throw next(error);
+      next(error);
     }
   }
 );
 
-//------------Purchase
 
-router.post("/purchase",
-  validatorHanlder()
-);
+module.exports = router;

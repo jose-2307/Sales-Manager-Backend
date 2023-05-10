@@ -18,12 +18,12 @@ const UserProductPurchaseSchema = {
     unique: false,
   },
   weight: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     allowNull: false,
     unique: false,
   },
   purchasePriceKilo: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     field: "purchase_price_kilo",
     allowNull: false,
     unique: false,

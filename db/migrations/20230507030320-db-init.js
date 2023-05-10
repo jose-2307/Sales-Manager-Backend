@@ -117,13 +117,13 @@ module.exports = {
         allowNull: false,
       },
       salePriceKilo: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         unique: false,
         allowNull: false,
         field: "sale_price_kilo",
       },
       weight: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         unique: false,
         allowNull: false,
         defaultValue: 0,
@@ -165,12 +165,12 @@ module.exports = {
         unique: false,
       },
       weight: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         allowNull: false,
         unique: false,
       },
       purchasePriceKilo: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         field: "purchase_price_kilo",
         allowNull: false,
         unique: false,
@@ -219,7 +219,7 @@ module.exports = {
           key: "id"
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       }
     });
     await queryInterface.createTable(CUSTOMER_TABLE,{
@@ -326,12 +326,12 @@ module.exports = {
         onDelete: "CASCADE",
       },
       weight: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         unique: false,
         allowNull: false,
       },
       priceKilo: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.INTEGER,
         unique: false,
         allowNull: false,
         field: "price_kilo",

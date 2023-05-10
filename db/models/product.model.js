@@ -17,13 +17,13 @@ const ProductSchema = {
     allowNull: false,
   },
   salePriceKilo: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     unique: false,
     allowNull: false,
     field: "sale_price_kilo",
   },
   weight: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     unique: false,
     allowNull: false,
     defaultValue: 0,

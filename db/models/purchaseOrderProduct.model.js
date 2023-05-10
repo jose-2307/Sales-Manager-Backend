@@ -30,12 +30,12 @@ const PurchaseOrderProductSchema = {
     onDelete: "CASCADE",
   },
   weight: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     unique: false,
     allowNull: false,
   },
   priceKilo: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     unique: false,
     allowNull: false,
     field: "price_kilo",

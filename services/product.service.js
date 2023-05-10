@@ -5,8 +5,10 @@ class ProductService {
   constructor(){}
 
   async create(data) {
-    await this.findName(data.userId, data.name); //busca duplicidad en el nombre
-    const newProduct = await models.Product.create(data);
+    let { name } = data;
+    name = name.toLowerCase();
+    await this.findName(data.userId, name); //busca duplicidad en el nombre
+    const newProduct = await models.Product.create({...data, name});
     const { id } = newProduct;
     const { urls } = data;
     if (urls) {
@@ -16,8 +18,7 @@ class ProductService {
           productId: id,
         }
       });
-      console.log(images);
-      // const newImages = await this.createImages();
+      await this.createImages(images);
     }
     return newProduct;
   }
@@ -40,7 +41,8 @@ class ProductService {
       where: {
         userId,
         categoryId
-      }
+      },
+      include: ["images"]
     });
     return products;
   }
@@ -59,7 +61,7 @@ class ProductService {
     const product = await this.findOne(id);
     //! Añadir lo de las imagenes
 
-    const resp = await product.update(id,changes);
+    const resp = await product.update(changes);
     return resp;
   }
 

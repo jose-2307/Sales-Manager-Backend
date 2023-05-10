@@ -1,15 +1,21 @@
 const Joi = require("joi");
 
 const id = Joi.number().integer();
-const name = Joi.string().min(3).max(30).lowercase();
-const salePriceKilo = Joi.number().min(1);
+const name = Joi.string().min(3).max(30);
+const salePriceKilo = Joi.number().integer().positive();
 
 //images
-const urls = Joi.array().items(Joi.string().uri()).length(6);
+const urls = Joi.array().items(Joi.string().uri()).max(6);
 
 //
 const userId = Joi.number().integer();
 const categoryId = Joi.number().integer();
+
+//Purchase
+const purchaseDate = Joi.date().greater("1-1-2022");
+const weight = Joi.number().integer().positive();
+const purchasePriceKilo = Joi.number().integer().positive();
+const productId = Joi.number().integer();
 
 
 
@@ -17,6 +23,8 @@ const createProductSchema = Joi.object({
   name: name.required(),
   salePriceKilo: salePriceKilo.required(),
   urls,
+  userId: userId.required(),
+  categoryId: categoryId.required(),
 });
 
 
@@ -36,7 +44,32 @@ const getProductsByCategorySchema = Joi.object({
   categoryId: categoryId.required(),
 });
 
-const createPurchase = Joi.object({})
 
-module.exports = { createProductSchema, updateProductSchema, getProductSchema, getProductsByCategorySchema }
+const createPurchaseSchema = Joi.object({
+  purchaseDate: purchaseDate.required(),
+  weight: weight.required(),
+  purchasePriceKilo: purchasePriceKilo.required(),
+  productId: productId.required(),
+  userId: userId.required(),
+});
+
+
+const getAllPurchaseProductSchema = Joi.object({
+  productId: productId.required(),
+});
+
+
+const getPurchaseSchema = Joi.object({
+  id: id.required(),
+});
+
+module.exports = {
+  createProductSchema,
+  updateProductSchema,
+  getProductSchema,
+  getProductsByCategorySchema,
+  createPurchaseSchema,
+  getAllPurchaseProductSchema,
+  getPurchaseSchema
+}
 
