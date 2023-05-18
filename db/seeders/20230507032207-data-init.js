@@ -18,15 +18,19 @@ module.exports = {
     await queryInterface.bulkInsert(CATEGORY_TABLE, [
       {
         name: "Frutos secos",
+        image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1684368389/movcwilezy12af6kdf15.jpg",
       },
       {
         name: "Azúcares y dulces",
+        image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1684372670/rjuhvegxeqgtvap0wp3g.jpg",
       },
       {
         name: "Lácteos",
+        image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1684372702/txpm6qyfmertkntgrrqw.jpg",
       },
       {
         name: "Frutas y verduras",
+        image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1684372726/v3doi9mus7s8c6ad6mes.jpg",
       },
     ], {});
   },

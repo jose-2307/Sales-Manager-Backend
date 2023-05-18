@@ -8,7 +8,7 @@ const port = process.env.PORT || 8000;
 
 app.use(express.json()); //obtenemos los datos en formato json
 
-const whitelist = ["http://localhost:3000"]; //permitimos que el frontend se conecte
+const whitelist = ["http://localhost:5173"]; //permitimos que el frontend se conecte
 const options = {
   origin: (origin, callback) => {
     if (whitelist.includes(origin) || !origin) {
