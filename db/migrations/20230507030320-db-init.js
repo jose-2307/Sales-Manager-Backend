@@ -65,6 +65,16 @@ module.exports = {
         },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
+      },
+      refreshToken: {
+        field: "refresh_token",
+        allowNull: true,
+        type: DataTypes.STRING
+      },
+      recoveryToken: {
+        field: "recovery_token",
+        allowNull: true,
+        type: DataTypes.STRING
       }
     });
     await queryInterface.createTable(AUTH_TABLE,{
@@ -242,6 +252,11 @@ module.exports = {
       location: {
         type: DataTypes.STRING,
         unique: false,
+        allowNull: true,
+      },
+      email: {
+        type: DataTypes.STRING,
+        unique: true,
         allowNull: true,
       },
       userId: {

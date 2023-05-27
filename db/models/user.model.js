@@ -36,7 +36,17 @@ const UserSchema = {
     },
     onUpdate: "CASCADE",
     onDelete: "SET NULL",
-  }
+  },
+  refreshToken: {
+    field: "refresh_token",
+    allowNull: true,
+    type: DataTypes.STRING
+  },
+  recoveryToken: {
+    field: "recovery_token",
+    allowNull: true,
+    type: DataTypes.STRING
+  },
 }
 
 

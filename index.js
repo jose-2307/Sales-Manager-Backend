@@ -20,7 +20,7 @@ const options = {
 }
 app.use(cors(options)); //controlamos el acceso
 
-//auth...
+require("./utils/auth");
 
 routerApi(app);
 

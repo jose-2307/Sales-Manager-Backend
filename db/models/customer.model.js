@@ -25,6 +25,11 @@ const CustomerSchema = {
     unique: false,
     allowNull: true,
   },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+  },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,

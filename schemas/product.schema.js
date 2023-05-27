@@ -8,7 +8,6 @@ const salePriceKilo = Joi.number().integer().positive();
 const urls = Joi.array().items(Joi.string().uri()).max(6);
 
 //
-const userId = Joi.number().integer();
 const categoryId = Joi.number().integer();
 
 //Purchase
@@ -23,7 +22,6 @@ const createProductSchema = Joi.object({
   name: name.required(),
   salePriceKilo: salePriceKilo.required(),
   urls,
-  userId: userId.required(),
   categoryId: categoryId.required(),
 });
 
@@ -40,7 +38,6 @@ const getProductSchema = Joi.object({
 
 
 const getProductsByCategorySchema = Joi.object({
-  userId: userId.required(),
   categoryId: categoryId.required(),
 });
 
@@ -50,7 +47,6 @@ const createPurchaseSchema = Joi.object({
   weight: weight.required(),
   purchasePriceKilo: purchasePriceKilo.required(),
   productId: productId.required(),
-  userId: userId.required(),
 });
 
 

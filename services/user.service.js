@@ -25,12 +25,28 @@ class UserService {
 
     const newUser = await models.User.create({...data, roleId: role.id});
     await models.Auth.create({userId: newUser.id, password: hash});
+    delete newUser.dataValues.refreshToken;
+    delete newUser.dataValues.recoveryToken;
     return newUser;
   }
 
   async find() {
     const users = await models.User.findAll();
     return users;
+  }
+
+  async findByEmail(email) {
+    const user = await models.User.findOne({
+      where: {
+        email
+      },
+     include: ["role"]});
+    if (!user) {
+      throw boom.notFound("user not found");
+    }
+
+    const auth = await models.Auth.findByPk(user.id);
+    return {...user, password: auth.password};
   }
 
   async findOne(id) {
@@ -45,6 +61,17 @@ class UserService {
 
   async update(id, changes) {
     const user = await this.findOne(id);
+
+    if (changes.password) { //La contraseña se actualiza individualmente
+      const auth = await models.Auth.findByPk(user.id);
+      await auth.update({ password: changes.password });
+      if ("recoveryToken" in changes) {
+        await user.update({ recoveryToken: changes.recoveryToken });
+        return { message: "password and recoveryToken changed" };
+      }
+      return { message: "password changed" };
+    }
+
     const resp = await user.update(changes);
     return resp;
   }
