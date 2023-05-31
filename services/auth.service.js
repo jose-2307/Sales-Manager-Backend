@@ -30,15 +30,15 @@ class AuthService {
       sub: user.dataValues.id,
       role: user.role.name,
     };
-    const accesToken = jwt.sign(payload, config.jwtSecretLogin, {
-      expiresIn: "10min",
+    const accessToken = jwt.sign(payload, config.jwtSecretLogin, {
+      expiresIn: "30min",
     });
     const refreshToken = jwt.sign(payload, config.jwtSecretRefresh, {
       expiresIn: "90min",
     });
 
     await userService.update(user.dataValues.id, { refreshToken });
-    return { user: user.dataValues, accesToken, refreshToken };
+    return { user: user.dataValues, accessToken, refreshToken };
   }
 
   async signRefreshToken(refreshToken) {
