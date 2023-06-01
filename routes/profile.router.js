@@ -5,7 +5,7 @@ const UserService = require("./../services/user.service");
 const ProductService = require("../services/product.service");
 const validatorHandler = require("./../middlewares/validator.handler");
 const { updateUserSchema } = require("./../schemas/user.schema");
-const { createProductSchema, createPurchaseSchema, getProductsByCategorySchema } = require("../schemas/product.schema");
+const { createProductSchema, createPurchaseSchema, getProductsByCategorySchema, getProductSchema, updateProductSchema } = require("../schemas/product.schema");
 
 const router = express.Router();
 const userService = new UserService();
@@ -89,6 +89,37 @@ router.post("/product-purchase",
   }
 );
 
+router.patch("/product/:id", //! Añadir lo de las imagenes
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getProductSchema, "params"),
+  validatorHandler(updateProductSchema, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const body = req.body;
+      const resp = await productService.update(user.sub, id, body);
+      res.json(resp);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete("/product/:id",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getProductSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const resp = await productService.delete(user.sub, id);
+      res.json({resp});
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 
 module.exports = router;

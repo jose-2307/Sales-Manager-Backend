@@ -56,8 +56,11 @@ class ProductService {
     return product;
   }
 
-  async update(id, changes) {
+  async update(userId, id, changes) {
     const product = await this.findOne(id);
+    if (product.user.id !== userId) {
+      throw boom.unauthorized();
+    }
     //! Añadir lo de las imagenes
 
     const resp = await product.update(changes);
@@ -120,8 +123,11 @@ class ProductService {
 
   //---------------------
 
-  async delete(id) {
+  async delete(userId, id) {
     const product = await this.findOne(id);
+    if (product.user.id !== userId) {
+      throw boom.unauthorized();
+    }
     await product.destroy();
     return { id };
   }
