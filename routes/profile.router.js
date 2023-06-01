@@ -98,7 +98,8 @@ router.patch("/product/:id", //! Añadir lo de las imagenes
       const user = req.user;
       const { id } = req.params;
       const body = req.body;
-      const resp = await productService.update(user.sub, id, body);
+      await productService.userValidate(user.sub, id);
+      const resp = await productService.update(id, body);
       res.json(resp);
     } catch (error) {
       next(error);
@@ -113,7 +114,8 @@ router.delete("/product/:id",
     try {
       const user = req.user;
       const { id } = req.params;
-      const resp = await productService.delete(user.sub, id);
+      await productService.userValidate(user.sub, id);
+      const resp = await productService.delete(id);
       res.json({resp});
     } catch (error) {
       next(error);
