@@ -31,7 +31,7 @@ class AuthService {
       role: user.role.name,
     };
     const accessToken = jwt.sign(payload, config.jwtSecretLogin, {
-      expiresIn: "30min",
+      expiresIn: "5min",
     });
     const refreshToken = jwt.sign(payload, config.jwtSecretRefresh, {
       expiresIn: "90min",
@@ -52,7 +52,7 @@ class AuthService {
         throw boom.unauthorized();
       }
       //crear el accessToken
-      const accessToken = jwt.sign({ sub: payloadRefresh.sub, role: payloadRefresh.role }, config.jwtSecretLogin, { expiresIn: "10min" });
+      const accessToken = jwt.sign({ sub: payloadRefresh.sub, role: payloadRefresh.role }, config.jwtSecretLogin, { expiresIn: "5min" });
 
       return { accessToken, user };
 
@@ -85,7 +85,7 @@ class AuthService {
       const token = jwt.sign(payload, config.jwtSecretRecovery, { expiresIn: "15min" });
 
       //Generar la url para que el usuario pueda realizar el cambio
-      const uri = `http://${config.recoveryUri}/recovery?token=${token}`;
+      const uri = `http://${config.recoveryUri}/change-password?token=${token}`;
 
       //Almacenar token en el usuario
       await userService.update(user.dataValues.id, { recoveryToken: token });
