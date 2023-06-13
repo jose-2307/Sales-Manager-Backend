@@ -10,13 +10,18 @@ class CategoryService {
   async create(data) {
     let { name } = data;
     name = name.toLowerCase();
-    await this.findName(data.userId, name); //busca duplicidad en el nombre
+    await this.findAttribute(data.userId, "name", name); //busca duplicidad en el nombre
     const newCustomer = await models.Customer.create({...data, name});
     return newCustomer;
   }
 
-  async find() {
-    const customers = await models.Customer.findAll();
+  async find(userId) {
+    const customers = await models.Customer.findAll({
+      where: {
+        userId
+      },
+      include: ["purchaseOrders"]
+    });
     return customers;
   }
 
@@ -30,20 +35,32 @@ class CategoryService {
     return customer;
   }
 
-  async findName(userId, name) {
+  async findAttribute(userId, attribute, data) {
     const customer = await models.Customer.findOne({
       where: {
         userId,
-        name
-      }
+        [attribute]: data,
+      },
     });
     if (customer) {
-      throw boom.conflict("The customer is already entered");
+      throw boom.conflict(`The customer with this ${attribute} is already entered`);
     }
     return true;
   }
 
-  async update(id, changes) {
+  async update(userId, id, changes) {
+    const { name, phone, email } = changes;
+
+    if (name) {
+      await this.findAttribute(userId, "name", name);
+    }
+    if (phone) {
+      await this.findAttribute(userId, "phone", phone);
+    }
+    if (email) {
+      await this.findAttribute(userId, "email", email);
+    }
+
     const customer = await this.findOne(id);
     const resp = await customer.update(changes);
     return resp;
@@ -65,6 +82,13 @@ class CategoryService {
   //--------------Purchase_Orders
 
   async createPurchaseOrderByCustomer(data) {
+    //Controlar que la fecha de venta sea menor o igual que la fecha de pago
+    let { saleDate, paymentDate } = data;
+    if (paymentDate) {
+      saleDate = new Date(saleDate);
+      paymentDate = new Date(paymentDate);
+      if (saleDate > paymentDate) throw boom.badRequest("The payment date can't be greater than sale date.");
+    }
     const newPurchase = await models.PurchaseOrder.create(data);
     return newPurchase;
   }
@@ -79,8 +103,12 @@ class CategoryService {
     return orders;
   }
 
-  async findOnePurchaseOrderByCustomer(id) {
-    const order = await models.PurchaseOrder.findByPk(id, {
+  async findOnePurchaseOrderByCustomer(customerId, orderId) {
+    const order = await models.PurchaseOrder.findAll({
+      where: {
+        id: orderId,
+        customerId,
+      },
       include: ["orderProducts"],
     });
     if (!order) {
@@ -89,8 +117,8 @@ class CategoryService {
     return order;
   }
 
-  async updatePurchaseOrder(id, changes) {
-    const purchase = await this.findOne(id);
+  async updatePurchaseOrder(customerId, orderId, changes) {
+    const purchase = await this.findOnePurchaseOrderByCustomer(customerId,orderId);
     const resp = await purchase.update(changes);
     return resp;
   }
@@ -121,6 +149,20 @@ class CategoryService {
   //   }
   //   return order;
   // }
+
+  //----------------Tabla de deudores
+
+  async getRebtors(userId) {
+    const customers = await this.find(userId);
+    // let resp = customers.map(customer => {
+    //   if (!customer.purchaseOrders.paidOut) {
+    //     return customer;
+    //   }
+    // });
+    console.log(customers);
+  }
+
+
 
 
 }

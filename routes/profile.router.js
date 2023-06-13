@@ -3,13 +3,16 @@ const passport = require("passport");
 
 const UserService = require("./../services/user.service");
 const ProductService = require("../services/product.service");
+const CustomerService = require("../services/customer.service");
 const validatorHandler = require("./../middlewares/validator.handler");
 const { updateUserSchema } = require("./../schemas/user.schema");
 const { createProductSchema, createPurchaseSchema, getProductsByCategorySchema, getProductSchema, updateProductSchema } = require("../schemas/product.schema");
+const { createCustomerSchema, getCustomerSchema, updateCustomerSchema, createPurchaseOrder, getPurchaseOrderSchema, updatePurchaseOrder, createPurchaseOrderProduct } = require("../schemas/customer.schema");
 
 const router = express.Router();
 const userService = new UserService();
 const productService = new ProductService();
+const customerService = new CustomerService();
 
 
 router.get("/personal-information",
@@ -123,5 +126,174 @@ router.delete("/product/:id",
   }
 );
 
+//-----Customer
+
+router.post("/customer",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(createCustomerSchema, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const body = req.body;
+      body.userId = user.sub;
+      const newCustomer = await customerService.create(body);
+      res.status(201).json(newCustomer);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/customer",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const customers = await customerService.find(user.sub);
+      res.json(customers);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/customer/:id",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getCustomerSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      await customerService.userValidate(user.sub, id);
+      const customer = await customerService.findOne(id);
+      res.json(customer);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.patch("/customer/:id",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getCustomerSchema, "params"),
+  validatorHandler(updateCustomerSchema, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const body = req.body;
+      const resp = await customerService.update(user.sub, id, body);
+      res.json(resp);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete("/customer/:id",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getCustomerSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      await customerService.userValidate(user.sub, id);
+      const resp = await customerService.delete(id);
+      res.json({resp});
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post("/customer/:id/purchase-order",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getCustomerSchema, "params"),
+  validatorHandler(createPurchaseOrder, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const body = req.body;
+      body.customerId = id;
+      await customerService.userValidate(user.sub, id);
+      const newPurchaseOrder = await customerService.createPurchaseOrderByCustomer(body);
+      res.status(201).json(newPurchaseOrder);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/customer/:id/purchase-order",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getCustomerSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      await customerService.userValidate(user.sub, id);
+      const purchaseOrders = await customerService.findAllPurchaseOrdersByCustomer(id);
+      res.json(purchaseOrders);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/customer/:id/purchase-order/:orderId",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getPurchaseOrderSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id, orderId } = req.params;
+      await customerService.userValidate(user.sub, id);
+      const purchaseOrder = await customerService.findOnePurchaseOrderByCustomer(id, orderId);
+      res.json(purchaseOrder);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.patch("/customer/:id/purchase-order/:orderId",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getPurchaseOrderSchema, "params"),
+  validatorHandler(updatePurchaseOrder, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id, orderId } = req.params;
+      const body = req.body;
+      await customerService.userValidate(user.sub, id);
+      const resp = await customerService.updatePurchaseOrder(id, orderId , body);
+      res.json(resp);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// PurchaseOrderProduct
+
+router.post("/customer/:id/purchase-order/:orderId/product",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getPurchaseOrderSchema, "params"),
+  validatorHandler(createPurchaseOrderProduct, "body"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { id, orderId } = req.params;
+      const body = req.body;
+      body.purchaseOrderId = orderId; //TODO verificar que el customer presenta esa order de compra y que el usuario presenta ese producto
+      await customerService.userValidate(user.sub, id);
+      const newPurchaseOrder = await customerService.createPurchaseOrderProduct(body);
+      res.status(201).json(newPurchaseOrder);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;
