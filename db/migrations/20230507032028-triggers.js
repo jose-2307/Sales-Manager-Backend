@@ -8,8 +8,6 @@ module.exports = {
       ' RETURNS TRIGGER'+
       ' Language plpgsql'+
       ' AS $$'+
-      ' DECLARE'+
-        ' _pet INTEGER;'+
       ' BEGIN'+
         ' INSERT INTO defaulters(user_id, customer_id) VALUES (NEW.user_id, NEW.id);'+
         ' RETURN new;'+
@@ -18,14 +16,14 @@ module.exports = {
 
     await queryInterface.sequelize.query(
       'CREATE TRIGGER trigger_defaulter_create '+
-      'BEFORE INSERT ON customers '+
+      'AFTER INSERT ON customers '+
       'FOR EACH ROW EXECUTE FUNCTION defaulter_create();'
     );
   },
 
 
   async down (queryInterface) {
-    await queryInterface.sequelize.query("DROP TRIGGER trigger_defaulter_create ON customers");
+    await queryInterface.sequelize.query("DROP TRIGGER trigger_defaulter_create ON customers;");
     await queryInterface.sequelize.query("DROP FUNCTION defaulter_create;");
   }
 };

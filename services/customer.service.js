@@ -119,7 +119,7 @@ class CategoryService {
 
   async updatePurchaseOrder(customerId, orderId, changes) {
     const purchase = await this.findOnePurchaseOrderByCustomer(customerId,orderId);
-    const resp = await purchase.update(changes);
+    const resp = await purchase[0].update(changes);
     return resp;
   }
 
@@ -127,9 +127,13 @@ class CategoryService {
   //--------------Purchase_Orders_Products
 
   async createPurchaseOrderProduct(data) {
-    const { productId } = data;
-    const {salePriceKilo } = await productService.findOne(productId);
-    const resp = await models.PurchaseOrderProduct.create({priceKilo: salePriceKilo, ...data});
+    const { productId, weight } = data;
+    const product = await productService.findOne(productId);
+    if (weight > product.weight) {
+      throw boom.conflict("The weight entered is greater than the actual weight of product");
+    }
+    const resp = await models.PurchaseOrderProduct.create({priceKilo: product.salePriceKilo, ...data});
+    await productService.updateWeight(productId, weight, false);
     return resp;
   }
 
@@ -154,15 +158,67 @@ class CategoryService {
 
   async getRebtors(userId) {
     const customers = await this.find(userId);
-    // let resp = customers.map(customer => {
-    //   if (!customer.purchaseOrders.paidOut) {
-    //     return customer;
-    //   }
-    // });
-    console.log(customers);
+    let resp = [];
+
+    for (let c of customers) {
+      let purchaseOrders = [];
+      for (let po of c.purchaseOrders) {
+        if (!po.paidOut) {
+          const purchaseOrderProducts = await models.PurchaseOrderProduct.findAll({
+            where: {
+              purchaseOrderId: po.id,
+            },
+          });
+          purchaseOrders.push({
+            ...po.dataValues,
+            purchaseOrderProducts
+          });
+        }
+      }
+      if (purchaseOrders.length !== 0) {
+        resp.push({
+          id: c.id,
+          name: c.name,
+          phone: c.phone,
+          location: c.location,
+          email: c.email,
+          purchaseOrders
+        });
+      }
+    }
+    return resp;
   }
 
+  async getSales(userId) {
+    const customers = await this.find(userId);
+    let resp = [];
 
+    for (let c of customers) {
+      let purchaseOrders = [];
+      for (let po of c.purchaseOrders) {
+        const purchaseOrderProducts = await models.PurchaseOrderProduct.findAll({
+          where: {
+            purchaseOrderId: po.id,
+          },
+        });
+        purchaseOrders.push({
+          ...po.dataValues,
+          purchaseOrderProducts
+        });
+      }
+      if (purchaseOrders.length !== 0) {
+        resp.push({
+          id: c.id,
+          name: c.name,
+          phone: c.phone,
+          location: c.location,
+          email: c.email,
+          purchaseOrders
+        });
+      }
+    }
+    return resp;
+  }
 
 
 }

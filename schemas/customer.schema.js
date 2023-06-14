@@ -5,7 +5,6 @@ const name = Joi.string().min(3).max(30);
 const phone = Joi.string().length(12);
 const location = Joi.string().min(3).max(30);
 const email = Joi.string().email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "cl"] } });
-const userId = Joi.number().integer();
 
 //Purchase order
 const saleDate = Joi.date().greater("1-1-2022");
@@ -16,20 +15,19 @@ const orderId = Joi.number().integer();
 
 //Purchase order product
 const weight = Joi.number().integer().positive();
-
+const productId = Joi.number().integer();
 
 const createCustomerSchema = Joi.object({
   name: name.required(),
   phone: phone.required(),
   location,
   email,
-  userId: userId.required(),
 });
 
 
 const updateCustomerSchema = Joi.object({
-  name: name.required(),
-  phone: phone.required(),
+  name,
+  phone,
   location,
   email,
 });
@@ -58,7 +56,7 @@ const updatePurchaseOrder = Joi.object({
 });
 
 const createPurchaseOrderProduct = Joi.object({
-  orderId: orderId.required(),
+  productId: productId.required(),
   weight: weight.required(),
 });
 

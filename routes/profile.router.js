@@ -286,10 +286,39 @@ router.post("/customer/:id/purchase-order/:orderId/product",
       const user = req.user;
       const { id, orderId } = req.params;
       const body = req.body;
-      body.purchaseOrderId = orderId; //TODO verificar que el customer presenta esa order de compra y que el usuario presenta ese producto
-      await customerService.userValidate(user.sub, id);
+      body.purchaseOrderId = orderId;
+      await customerService.userValidate(user.sub, id); //Verifica que el customer sea del usuario
+      await customerService.findOnePurchaseOrderByCustomer(id, orderId); //Verifica que la orden de compra sea del customer
+      await productService.userValidate(user.sub, body.productId); //Verifica que el producto pertenece al usuario
       const newPurchaseOrder = await customerService.createPurchaseOrderProduct(body);
       res.status(201).json(newPurchaseOrder);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
+router.get("/rebtors",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await customerService.getRebtors(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/sales",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await customerService.getSales(user.sub);
+      res.json(data);
     } catch (error) {
       next(error);
     }
