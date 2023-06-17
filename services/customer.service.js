@@ -162,12 +162,17 @@ class CategoryService {
 
     for (let c of customers) {
       let purchaseOrders = [];
+      let debt = 0;
+
       for (let po of c.purchaseOrders) {
         if (!po.paidOut) {
           const purchaseOrderProducts = await models.PurchaseOrderProduct.findAll({
             where: {
               purchaseOrderId: po.id,
             },
+          });
+          purchaseOrderProducts.forEach(p => {
+            debt += (p.weight * p.priceKilo) / 1000;
           });
           purchaseOrders.push({
             ...po.dataValues,
@@ -182,6 +187,7 @@ class CategoryService {
           phone: c.phone,
           location: c.location,
           email: c.email,
+          debt,
           purchaseOrders
         });
       }
