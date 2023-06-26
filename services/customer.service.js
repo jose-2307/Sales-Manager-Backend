@@ -156,7 +156,7 @@ class CategoryService {
 
   //----------------Tabla de deudores
 
-  async getRebtors(userId) {
+  async getDebtors(userId) {
     const customers = await this.find(userId);
     let resp = [];
 
@@ -171,11 +171,15 @@ class CategoryService {
               purchaseOrderId: po.id,
             },
           });
+          let orderDebt = 0;
           purchaseOrderProducts.forEach(p => {
-            debt += (p.weight * p.priceKilo) / 1000;
+            orderDebt += (p.weight * p.priceKilo) / 1000;
           });
+          orderDebt -= po.subscriber;
+          debt += orderDebt;
           purchaseOrders.push({
             ...po.dataValues,
+            orderDebt,
             purchaseOrderProducts
           });
         }

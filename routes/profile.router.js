@@ -299,12 +299,12 @@ router.post("/customer/:id/purchase-order/:orderId/product",
 );
 
 
-router.get("/rebtors",
+router.get("/debtors",
   passport.authenticate("jwt", {session: false}),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await customerService.getRebtors(user.sub);
+      const data = await customerService.getDebtors(user.sub);
       res.json(data);
     } catch (error) {
       next(error);
