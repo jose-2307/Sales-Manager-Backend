@@ -118,7 +118,16 @@ class CategoryService {
   }
 
   async updatePurchaseOrder(customerId, orderId, changes) {
+    let subscriber = changes.subscriber ? changes.subscriber : null;
     const purchase = await this.findOnePurchaseOrderByCustomer(customerId,orderId);
+    if (subscriber != null && purchase[0].subscriber != 0) { //Verifica si ya se ha realizado un abono. De ser así, se acumula el abono
+      let newSubscriber = parseInt(subscriber);
+
+      newSubscriber += purchase[0].subscriber;
+      const resp = await purchase[0].update({subscriber: newSubscriber});
+
+      return resp;
+    }
     const resp = await purchase[0].update(changes);
     return resp;
   }
@@ -172,9 +181,11 @@ class CategoryService {
             },
           });
           let orderDebt = 0;
-          purchaseOrderProducts.forEach(p => {
+          for (let p of purchaseOrderProducts){
             orderDebt += (p.weight * p.priceKilo) / 1000;
-          });
+            const { name } = await productService.findOne(p.productId);
+            p.dataValues["productName"] = name;
+          };
           orderDebt -= po.subscriber;
           debt += orderDebt;
           purchaseOrders.push({
