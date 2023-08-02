@@ -61,19 +61,21 @@ class UserService {
 
   async update(id, changes) {
     const user = await this.findOne(id);
-
     if (changes.password) { //La contraseña se actualiza individualmente
+      const hash = await bcrypt.hash(changes.password, 10);
       const auth = await models.Auth.findByPk(user.id);
-      await auth.update({ password: changes.password });
+      await auth.update({ password: hash });
       if ("recoveryToken" in changes) {
         await user.update({ recoveryToken: changes.recoveryToken });
         return { message: "password and recoveryToken changed" };
       }
       return { message: "password changed" };
+    } else {
+      const resp = await user.update(changes);
+      return resp;
     }
 
-    const resp = await user.update(changes);
-    return resp;
+
   }
 
   async delete(id) {

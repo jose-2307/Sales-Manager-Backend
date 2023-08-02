@@ -8,9 +8,12 @@ class CategoryService {
   constructor(){}
 
   async create(data) {
-    let { name } = data;
+    let { name, phone, email="" } = data;
     name = name.toLowerCase();
     await this.findAttribute(data.userId, "name", name); //busca duplicidad en el nombre
+    await this.findAttribute(data.userId, "phone", phone); //busca duplicidad en el nombre
+    if (email) await this.findAttribute(data.userId, "email", email); //busca duplicidad en el nombre
+
     const newCustomer = await models.Customer.create({...data, name});
     return newCustomer;
   }
@@ -35,13 +38,16 @@ class CategoryService {
     return customer;
   }
 
-  async findAttribute(userId, attribute, data) {
+  async findAttribute(userId, attribute, data, id="") {
     const customer = await models.Customer.findOne({
       where: {
         userId,
         [attribute]: data,
       },
     });
+    if (customer && customer.id == id) {
+      return true;
+    }
     if (customer) {
       throw boom.conflict(`The customer with this ${attribute} is already entered`);
     }
@@ -52,13 +58,13 @@ class CategoryService {
     const { name, phone, email } = changes;
 
     if (name) {
-      await this.findAttribute(userId, "name", name);
+      await this.findAttribute(userId, "name", name, id);
     }
     if (phone) {
-      await this.findAttribute(userId, "phone", phone);
+      await this.findAttribute(userId, "phone", phone, id);
     }
     if (email) {
-      await this.findAttribute(userId, "email", email);
+      await this.findAttribute(userId, "email", email, id);
     }
 
     const customer = await this.findOne(id);

@@ -4,6 +4,8 @@ const passport = require("passport");
 const UserService = require("./../services/user.service");
 const ProductService = require("../services/product.service");
 const CustomerService = require("../services/customer.service");
+const AnalysisService = require("../services/analysis.service");
+
 const validatorHandler = require("./../middlewares/validator.handler");
 const { updateUserSchema } = require("./../schemas/user.schema");
 const { createProductSchema, createPurchaseSchema, getProductsByCategorySchema, getProductSchema, updateProductSchema } = require("../schemas/product.schema");
@@ -13,6 +15,7 @@ const router = express.Router();
 const userService = new UserService();
 const productService = new ProductService();
 const customerService = new CustomerService();
+const analysisService = new AnalysisService();
 
 
 router.get("/personal-information",
@@ -37,7 +40,7 @@ router.patch("/personal-information",
       const user = req.user;
       const body = req.body;
       const resp = await userService.update(user.sub,body);
-      delete resp.dataValues.recoveryToken;
+      if ("recoveryToken" in resp) delete resp.dataValues.recoveryToken;
       res.json(resp);
     } catch (error) {
       next(error);
@@ -324,5 +327,49 @@ router.get("/sales",
     }
   }
 );
+
+//Analysis
+
+router.get("/analysis/sales-product",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await analysisService.salesByProduct(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/analysis/investment",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await analysisService.amountInvested(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/analysis/income",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await analysisService.amountIncome(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+
+
 
 module.exports = router;
