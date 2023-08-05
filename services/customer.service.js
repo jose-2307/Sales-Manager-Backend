@@ -3,7 +3,9 @@ const boom = require("@hapi/boom");
 const ProductService = require("./product.service");
 
 const productService = new ProductService();
-
+const currentDate = new Date();
+const currentMonth = currentDate.getMonth() + 1;
+const currentYear = currentDate.getFullYear();
 class CategoryService {
   constructor(){}
 
@@ -128,9 +130,10 @@ class CategoryService {
     const purchase = await this.findOnePurchaseOrderByCustomer(customerId,orderId);
     if (subscriber != null && purchase[0].subscriber != 0) { //Verifica si ya se ha realizado un abono. De ser así, se acumula el abono
       let newSubscriber = parseInt(subscriber);
-
       newSubscriber += purchase[0].subscriber;
-      const resp = await purchase[0].update({subscriber: newSubscriber});
+      const date = new Date();
+
+      const resp = await purchase[0].update({subscriber: newSubscriber, subscriberDate: date});
 
       return resp;
     }
@@ -216,22 +219,32 @@ class CategoryService {
     return resp;
   }
 
-  async getSales(userId) {
+  async getSales(userId, year = currentYear, month = currentMonth) {
     const customers = await this.find(userId);
     let resp = [];
 
     for (let c of customers) {
       let purchaseOrders = [];
       for (let po of c.purchaseOrders) {
-        const purchaseOrderProducts = await models.PurchaseOrderProduct.findAll({
-          where: {
-            purchaseOrderId: po.id,
-          },
-        });
-        purchaseOrders.push({
-          ...po.dataValues,
-          purchaseOrderProducts
-        });
+        const date = new Date(po.saleDate);
+        const poMonth = date.getMonth() + 1;
+        const poYear = date.getFullYear();
+
+        if (poYear == year && poMonth == month) { //Entrega los datos correspondientes al conjunto mes-año indicado
+          const purchaseOrderProducts = await models.PurchaseOrderProduct.findAll({
+            where: {
+              purchaseOrderId: po.id,
+            },
+          });
+          for (let p of purchaseOrderProducts){
+            const { name } = await productService.findOne(p.productId);
+            p.dataValues["productName"] = name;
+          };
+          purchaseOrders.push({
+            ...po.dataValues,
+            purchaseOrderProducts
+          });
+        }
       }
       if (purchaseOrders.length !== 0) {
         resp.push({
@@ -244,6 +257,46 @@ class CategoryService {
         });
       }
     }
+    return resp;
+  }
+
+  //Obtener años y meses seleccionables
+
+  async getSalesYears(userId) {
+    const customers = await this.find(userId);
+    let years = [];
+
+    for (let c of customers) {
+      for (let po of c.purchaseOrders) {
+        const date = new Date(po.saleDate);
+        const year = date.getFullYear();
+        years.push(year);
+      }
+    }
+
+    let resp = years.filter((value, index, array) => array.indexOf(value) === index);
+    resp.sort((a,b) => a - b);
+    return resp;
+  }
+
+  async getSalesMonths(userId, year) {
+    const customers = await this.find(userId);
+    const months = [];
+
+    for (let c of customers) {
+      for (let po of c.purchaseOrders) {
+        const date = new Date(po.saleDate);
+        const poYear = date.getFullYear();
+        const poMonth = date.getMonth() + 1;
+        if (poYear == year) {
+          months.push(poMonth);
+        }
+      }
+    }
+
+    const resp = months.filter((value, index, array) => array.indexOf(value) === index);
+    resp.sort((a,b) => a - b);
+
     return resp;
   }
 

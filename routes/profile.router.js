@@ -9,7 +9,7 @@ const AnalysisService = require("../services/analysis.service");
 const validatorHandler = require("./../middlewares/validator.handler");
 const { updateUserSchema } = require("./../schemas/user.schema");
 const { createProductSchema, createPurchaseSchema, getProductsByCategorySchema, getProductSchema, updateProductSchema } = require("../schemas/product.schema");
-const { createCustomerSchema, getCustomerSchema, updateCustomerSchema, createPurchaseOrder, getPurchaseOrderSchema, updatePurchaseOrder, createPurchaseOrderProduct } = require("../schemas/customer.schema");
+const { createCustomerSchema, getCustomerSchema, updateCustomerSchema, createPurchaseOrder, getPurchaseOrderSchema, updatePurchaseOrder, createPurchaseOrderProduct, getSalesSchema, getMonthsSchema } = require("../schemas/customer.schema");
 
 const router = express.Router();
 const userService = new UserService();
@@ -317,10 +317,40 @@ router.get("/debtors",
 
 router.get("/sales",
   passport.authenticate("jwt", {session: false}),
+  validatorHandler(getSalesSchema, "query"),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await customerService.getSales(user.sub);
+      const { year, month } = req.query;
+      const data = await customerService.getSales(user.sub, year, month);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/sales/years",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await customerService.getSalesYears(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/sales/months/:year",
+  passport.authenticate("jwt", {session: false}),
+  validatorHandler(getMonthsSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const { year } = req.params;
+      const data = await customerService.getSalesMonths(user.sub, year);
       res.json(data);
     } catch (error) {
       next(error);
@@ -362,6 +392,19 @@ router.get("/analysis/income",
     try {
       const user = req.user;
       const data = await analysisService.amountIncome(user.sub);
+      res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get("/analysis/annual-balance",
+  passport.authenticate("jwt", {session: false}),
+  async (req, res, next) => {
+    try {
+      const user = req.user;
+      const data = await analysisService.annualBalance(user.sub);
       res.json(data);
     } catch (error) {
       next(error);

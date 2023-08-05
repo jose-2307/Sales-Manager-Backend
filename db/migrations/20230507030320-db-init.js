@@ -296,6 +296,12 @@ module.exports = {
         defaultValue: 0,
         unique: false,
       },
+      subscriberDate: {
+        allowNull: true,
+        unique: false,
+        type: DataTypes.DATEONLY,
+        field: "subscriber_date",
+      },
       paidOut: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

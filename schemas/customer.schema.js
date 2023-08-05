@@ -17,6 +17,10 @@ const orderId = Joi.number().integer();
 const weight = Joi.number().integer().positive();
 const productId = Joi.number().integer();
 
+//Sales
+const year = Joi.number().integer().positive();
+const month = Joi.number().integer().min(1).max(12);
+
 const createCustomerSchema = Joi.object({
   name: name.required(),
   phone: phone.required(),
@@ -60,6 +64,14 @@ const createPurchaseOrderProduct = Joi.object({
   weight: weight.required(),
 });
 
+const getSalesSchema = Joi.object({
+  year: year,
+  month: month,
+});
+
+const getMonthsSchema = Joi.object({
+  year: year.required(),
+});
 
 module.exports = {
   createCustomerSchema,
@@ -69,5 +81,7 @@ module.exports = {
   getPurchaseOrderSchema,
   updatePurchaseOrder,
   createPurchaseOrderProduct,
+  getSalesSchema,
+  getMonthsSchema,
 }
 
