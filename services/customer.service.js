@@ -74,11 +74,6 @@ class CategoryService {
     return resp;
   }
 
-  async delete(id) {
-    const customer = await this.findOne(id);
-    await customer.destroy();
-    return { id };
-  }
 
   async userValidate(userId, customerId) {
     const customer = await this.findOne(customerId);
@@ -155,23 +150,6 @@ class CategoryService {
     return resp;
   }
 
-  // async findAllOrderProducts(purchaseOrderId) {
-  //   const orderProducts = await models.PurchaseOrderProduct.findAll({
-  //     where: {
-  //       purchaseOrderId
-  //     },
-  //   });
-  //   return orderProducts;
-  // }
-
-  // async findOneOrderProducts(purchaseOrderId) {
-  //   const order = await models.PurchaseOrderProduct.findByPk(purchaseOrderId);
-  //   if (!order) {
-  //     throw boom.notFound("purchase order product not found");
-  //   }
-  //   return order;
-  // }
-
   //----------------Tabla de deudores
 
   async getDebtors(userId) {
@@ -192,7 +170,7 @@ class CategoryService {
           let orderDebt = 0;
           for (let p of purchaseOrderProducts){
             orderDebt += (p.weight * p.priceKilo) / 1000;
-            const { name } = await productService.findOne(p.productId);
+            const { name } = await productService.findOne(p.productId, true);
             p.dataValues["productName"] = name;
           };
           orderDebt -= po.subscriber;
@@ -237,7 +215,7 @@ class CategoryService {
             },
           });
           for (let p of purchaseOrderProducts){
-            const { name } = await productService.findOne(p.productId);
+            const { name } = await productService.findOne(p.productId, true);
             p.dataValues["productName"] = name;
           };
           purchaseOrders.push({
@@ -275,7 +253,7 @@ class CategoryService {
     }
 
     let resp = years.filter((value, index, array) => array.indexOf(value) === index);
-    resp.sort((a,b) => a - b);
+    resp.sort((a,b) => b - a);
     return resp;
   }
 
@@ -295,7 +273,7 @@ class CategoryService {
     }
 
     const resp = months.filter((value, index, array) => array.indexOf(value) === index);
-    resp.sort((a,b) => a - b);
+    resp.sort((a,b) => b - a);
 
     return resp;
   }

@@ -138,6 +138,12 @@ module.exports = {
         allowNull: false,
         defaultValue: 0,
       },
+      locked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        unique: false,
+      },
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: false,

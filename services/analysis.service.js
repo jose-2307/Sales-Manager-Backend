@@ -13,7 +13,6 @@ const currentYear = currentDate.getFullYear();
 class AnalysisService {
 
   async salesByProduct (userId) {
-
     const customers = await customerService.find(userId);
     const ordersId = [];
     const productsId = [];
@@ -49,7 +48,7 @@ class AnalysisService {
       for (let x of productsId) {
         if (x == id) count ++;
       }
-      const product = await productService.findOne(id);
+      const product = await productService.findOne(id, true);
       resp.push({name: product.name, count})
     }
 

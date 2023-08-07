@@ -26,7 +26,8 @@ class ProductService {
     const product = await models.Product.findOne({
       where: {
         userId,
-        name
+        name,
+        locked: false,
       }
     });
     if (product) {
@@ -39,17 +40,29 @@ class ProductService {
     const products = await models.Product.findAll({
       where: {
         userId,
-        categoryId
+        categoryId,
+        locked: false,
       },
       include: ["images"]
     });
     return products;
   }
 
-  async findOne(id) {
-    const product = await models.Product.findByPk(id,{
-      include: ["user", "category", "images"]
-    });
+  async findOne(id, considerLocked = false) { //considerLocked es utilizado para controlar si se considera o no el producto estando bloqueado
+    let product;
+    if (considerLocked) {
+      product = await models.Product.findByPk(id,{
+        include: ["user", "category", "images"],
+      });
+    } else {
+      product = await models.Product.findByPk(id,{
+        include: ["user", "category", "images"],
+        where: {
+          locked: false,
+        }
+      });
+    }
+
     if (!product) {
       throw boom.notFound("product not found");
     }
@@ -65,8 +78,21 @@ class ProductService {
 
   async update(id, changes) {
     const product = await this.findOne(id);
-    //! Añadir lo de las imagenes
-
+    if ("urls" in changes) {
+      const images = changes["urls"].map(url => {
+        return {
+          url,
+          productId: id,
+        }
+      });
+      const image = await models.Image.findOne({
+        where: {
+          productId: id
+        }
+      });
+      if (image) await image.destroy();
+      await this.createImages(images);
+    }
     const resp = await product.update(changes);
     return resp;
   }
@@ -118,18 +144,24 @@ class ProductService {
     return newImages
   }
 
-  // async deleteImages(ids) {
-  //   let exist = false;
-  //   for (let i; i < ids.length; i++) {
-
-  //   }
-  // }
 
   //---------------------
 
   async delete(id) {
-    const product = await this.findOne(id);
-    await product.destroy();
+    //Corroborar que no se hayan realizado ventas ni compras del producto
+    const purchase = await this.findAllByProduct(id); // []
+    const sales = await models.PurchaseOrderProduct.findAll({
+      where: {
+        productId: id
+      }
+    });
+
+    if (purchase.length === 0 && sales.length === 0) {
+      const product = await this.findOne(id);
+      await product.destroy();
+    } else { //Existe algún movimiento en el que está involucrado el producto
+      await this.update(id, {locked: true});
+    }
     return { id };
   }
 }
