@@ -31,7 +31,7 @@ class AuthService {
       role: user.role.name,
     };
     const accessToken = jwt.sign(payload, config.jwtSecretLogin, {
-      expiresIn: "50min",
+      expiresIn: "5min",
     });
     const refreshToken = jwt.sign(payload, config.jwtSecretRefresh, {
       expiresIn: "90min",
@@ -150,8 +150,7 @@ class AuthService {
       }
 
       //cambiar contraseña
-      const hash = await bcrypt.hash(newPassword, 10);
-      await userService.update(user.id, { password: hash, recoveryToken: null });
+      await userService.update(user.id, { password: newPassword, recoveryToken: null });
       return { message: "Password changed" };
 
     } catch (error) {

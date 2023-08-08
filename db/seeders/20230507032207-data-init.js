@@ -32,6 +32,10 @@ module.exports = {
         name: "Frutas y verduras",
         image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1684372726/v3doi9mus7s8c6ad6mes.jpg",
       },
+      {
+        name: "Otros productos",
+        image: "http://res.cloudinary.com/dmevmh3ch/image/upload/v1691455475/bzrkvaiu87jhdstikmok.png",
+      }
     ], {});
   },
 
