@@ -1,5 +1,4 @@
 const { models } = require("../libs/sequelize");
-const boom = require("@hapi/boom");
 const CustomerService = require("./customer.service");
 const ProductService = require("./product.service");
 
@@ -15,7 +14,7 @@ class AnalysisService {
   async salesByProduct (userId) {
     const customers = await customerService.find(userId);
     const ordersId = [];
-    const productsId = [];
+    const products = [];
 
     for (let c of customers) {
       for (let o of c.purchaseOrders) {
@@ -35,24 +34,17 @@ class AnalysisService {
         }
       });
       for (let op of orderProducts) {
-        productsId.push(op.productId);
+        const product = products.find(p => p.id === op.productId);
+        if (product) {
+          product["weight"] += op.weight;
+        } else {
+          const p = await productService.findOne(op.productId, true);
+          products.push({id: op.productId, name: p.name, weight: op.weight});
+        }
       }
     }
 
-    const uniqueProductsId = productsId.filter((value, index, arr) => arr.indexOf(value) === index);
-    const resp = [];
-
-    for (let id of uniqueProductsId) {
-      let count = 0;
-
-      for (let x of productsId) {
-        if (x == id) count ++;
-      }
-      const product = await productService.findOne(id, true);
-      resp.push({name: product.name, count})
-    }
-
-    return resp;
+    return products;
   }
 
 
