@@ -362,10 +362,12 @@ router.get("/sales/months/:year",
 
 router.get("/analysis/sales-product",
   passport.authenticate("jwt", {session: false}),
+  validatorHandler(getSalesSchema, "query"),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await analysisService.salesByProduct(user.sub);
+      const { year, month } = req.query;
+      const data = await analysisService.salesByProduct(user.sub, month, year);
       res.json(data);
     } catch (error) {
       next(error);
@@ -375,10 +377,12 @@ router.get("/analysis/sales-product",
 
 router.get("/analysis/investment",
   passport.authenticate("jwt", {session: false}),
+  validatorHandler(getSalesSchema, "query"),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await analysisService.amountInvested(user.sub);
+      const { year, month } = req.query;
+      const data = await analysisService.amountInvested(user.sub, month, year);
       res.json(data);
     } catch (error) {
       next(error);
@@ -388,10 +392,12 @@ router.get("/analysis/investment",
 
 router.get("/analysis/income",
   passport.authenticate("jwt", {session: false}),
+  validatorHandler(getSalesSchema, "query"),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await analysisService.amountIncome(user.sub);
+      const { year, month } = req.query;
+      const data = await analysisService.amountIncome(user.sub, month, year);
       res.json(data);
     } catch (error) {
       next(error);
@@ -401,10 +407,12 @@ router.get("/analysis/income",
 
 router.get("/analysis/annual-balance",
   passport.authenticate("jwt", {session: false}),
+  validatorHandler(getSalesSchema, "query"),
   async (req, res, next) => {
     try {
       const user = req.user;
-      const data = await analysisService.annualBalance(user.sub);
+      const { year } = req.query;
+      const data = await analysisService.annualBalance(user.sub, year);
       res.json(data);
     } catch (error) {
       next(error);

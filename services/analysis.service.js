@@ -11,17 +11,16 @@ const currentYear = currentDate.getFullYear();
 
 class AnalysisService {
 
-  async salesByProduct (userId) {
+  async salesByProduct (userId, monthEvaluate = currentMonth, yearEvaluate = currentYear) {
     const customers = await customerService.find(userId);
     const ordersId = [];
     const products = [];
-
     for (let c of customers) {
       for (let o of c.purchaseOrders) {
         const date = new Date(o.saleDate);
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
-        if (month === currentMonth && year === currentYear) {
+        if (month == monthEvaluate && year == yearEvaluate) {
           ordersId.push(o.id);
         }
       }
@@ -48,7 +47,7 @@ class AnalysisService {
   }
 
 
-  async amountInvested (userId, monthEvaluate = currentMonth) {
+  async amountInvested (userId, monthEvaluate = currentMonth, yearEvaluate = currentYear) {
     const purchases = await models.UserProductPurchase.findAll({
       where: {
         userId
@@ -61,7 +60,7 @@ class AnalysisService {
       const date = new Date(x.purchaseDate);
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
-      if (month === monthEvaluate && year === currentYear) {
+      if (month == monthEvaluate && year == yearEvaluate) {
         amount += (x.weight * x.purchasePriceKilo) / 1000;
       }
     });
@@ -69,7 +68,7 @@ class AnalysisService {
     return amount;
   }
 
-  async amountIncome (userId, monthEvaluate = currentMonth) {
+  async amountIncome (userId, monthEvaluate = currentMonth, yearEvaluate = currentYear) {
     const customers = await customerService.find(userId);
     const ordersId = [];
     let amount = 0;
@@ -81,14 +80,14 @@ class AnalysisService {
           const paymentMonth = paymentDate.getMonth() + 1;
           const paymentYear = paymentDate.getFullYear();
 
-          if (paymentMonth === monthEvaluate && paymentYear === currentYear) { //Se realizó el pago completo
+          if (paymentMonth == monthEvaluate && paymentYear == yearEvaluate) { //Se realizó el pago completo
               ordersId.push(o.id);
           }
         } else if (o.subscriber > 0) {
           const subscriberDate = new Date(o.subscriberDate);
           const subscriberMonth = subscriberDate.getMonth() + 1;
           const subscriberYear = subscriberDate.getFullYear();
-          if (subscriberMonth === monthEvaluate && subscriberYear === currentYear) {
+          if (subscriberMonth == monthEvaluate && subscriberYear == yearEvaluate) {
             amount += o.subscriber;
           }
         }
@@ -107,7 +106,7 @@ class AnalysisService {
     return amount;
   }
 
-  async annualBalance (userId) {
+  async annualBalance (userId, yearEvaluate = currentYear) {
     const months = [
       { number: 1, name: "Enero" },
       { number: 2, name: "Febrero" },
@@ -125,8 +124,8 @@ class AnalysisService {
 
     const annualBalance = [];
     for (let m of months) {
-      const invested = await this.amountInvested(userId, m.number);
-      const income = await this.amountIncome(userId, m.number);
+      const invested = await this.amountInvested(userId, m.number, yearEvaluate);
+      const income = await this.amountIncome(userId, m.number, yearEvaluate);
       const balance = income - invested;
       annualBalance.push({ ...m, balance });
     }
